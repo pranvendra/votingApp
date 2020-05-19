@@ -39,6 +39,23 @@ async function createPollTable() {
     return polls
 }
 
+async function createPoll(pollName, password) {
+    var createPoll = `
+    INSERT INTO poll (pollName, userId)
+    VALUES ('${userName}', '${password}')
+    `;
+    var polls = await client.query(createPollTableQuery, (err, res) => {
+        if (err) {
+            console.error(err);
+            return [];
+        }
+        console.log('Data insert successful');
+        client.end();
+    });
+    return polls
+}
+
+
 
 
 module.exports = {

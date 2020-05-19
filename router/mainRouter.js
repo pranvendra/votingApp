@@ -4,11 +4,12 @@ const PollsController = require('../controllers/mainController');
 const passport = require('passport')
 const ensuredLogin = require('connect-ensure-login').ensureLoggedIn()
 // Home page route.
-router.get('/', PollsController.polls)
+router.get('/', (req, res) => res.send('Hello World!'))
 router.get('/createTables', PollsController.createTables)
 // router.post('/login', ensuredLogin ,function(req, res){
 //   res.redirect('/');
 // })
+router.get('/createPolls', PollsController.createTables)
 
 
 router.post('/login', 
