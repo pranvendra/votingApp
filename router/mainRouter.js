@@ -5,7 +5,7 @@ const passport = require('passport')
 const ensuredLogin = require('connect-ensure-login').ensureLoggedIn()
 // Home page route.
 router.get('/', PollsController.polls)
-router.get('/createTables', PollsController.createTables(req, res))
+router.get('/createTables', PollsController.createTables)
 // router.post('/login', ensuredLogin ,function(req, res){
 //   res.redirect('/');
 // })
