@@ -1,8 +1,10 @@
 const Poll = require('../models/Poll')
 
-function polls(uId) {
-    console.log("controller -> polls")
-    return "hello world"
+
+async function polls(req, res) {
+    var polls = await Poll.getPolls()
+    console.log(polls)
+    return polls
 }
 
 function createTables(){

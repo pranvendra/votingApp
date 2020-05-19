@@ -1,20 +1,11 @@
 const client =  require("./client").client
 
 
-const allPollsQuery = `
-Select * from poll
-`;
-
-
 async function getPolls() {
-    var polls = await client.query(allPollsQuery, (err, res) => {
-        if (err) {
-            console.error(err);
-            return [];
-        }
-        console.log('Data insert successful');
-        client.end();
-    });
+    const allPollsQuery = `
+    Select * from poll
+    `;
+    var polls = await (await client.query(allPollsQuery)).rows
     return polls
 }
 
@@ -22,36 +13,21 @@ const createPollTableQuery = `
 CREATE TABLE poll(
 	pollId serial PRIMARY KEY,
 	pollName VARCHAR (355) UNIQUE NOT NULL,
-	createdBy INTEGER REFERENCES account(user_id) NOT NULL,
-	created_on TIMESTAMP NOT NULL
+	createdBy INTEGER REFERENCES user(userId) NOT NULL
 );
 `
 
 async function createPollTable() {
-    var polls = await client.query(createPollTableQuery, (err, res) => {
-        if (err) {
-            console.error(err);
-            return [];
-        }
-        console.log('Data insert successful');
-        client.end();
-    });
+    var polls = await client.query(createPollTableQuery);
     return polls
 }
 
-async function createPoll(pollName, password) {
+async function createPoll(pollName, uid = 1) {
     var createPoll = `
     INSERT INTO poll (pollName, userId)
-    VALUES ('${userName}', '${password}')
+    VALUES ('${pollName}', '${uid}')
     `;
-    var polls = await client.query(createPollTableQuery, (err, res) => {
-        if (err) {
-            console.error(err);
-            return [];
-        }
-        console.log('Data insert successful');
-        client.end();
-    });
+    var polls = await client.query(createPoll);
     return polls
 }
 
@@ -60,5 +36,6 @@ async function createPoll(pollName, password) {
 
 module.exports = {
     getPolls,
-    createPollTable
+    createPollTable,
+    createPoll
 }
