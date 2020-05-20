@@ -1,0 +1,121 @@
+<html lang="en">
+    <head>
+        <title>
+            Voting App
+        </title>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.4.0/Chart.min.js"></script>
+        <script type="text/javascript" src="http://www.chartjs.org/assets/Chart.js">
+        </script>
+        <script type="text/javascript" src="jscript/graph.js"></script>
+        <script>
+            function toggleField(hideObj,showObj){
+              hideObj.disabled=true;        
+              hideObj.style.display='none';
+              showObj.disabled=false;   
+              showObj.style.display='inline';
+              showObj.focus();
+            }
+        </script>
+
+        <style  type="text/css">
+        #leftdiv {
+                min-width: 400px;
+                max-width: 800px;
+            }
+            
+            #canvas-holder {
+                width: 50px;
+                float: right;
+            }
+            </style>
+    </head>
+      
+    <body>
+	<script>
+		var randomScalingFactor = function() {
+			return Math.round(Math.random() * 100);
+		};
+        var config = "<%=config%>"
+		window.onload = function() {
+			var ctx = document.getElementById('chart-area').getContext('2d');
+			window.myPie = new Chart(ctx, config);
+		};
+
+		document.getElementById('randomizeData').addEventListener('click', function() {
+			config.data.datasets.forEach(function(dataset) {
+				dataset.data = dataset.data.map(function() {
+					return randomScalingFactor();
+				});
+			});
+
+			window.myPie.update();
+		});
+
+		var colorNames = Object.keys(window.chartColors);
+		document.getElementById('addDataset').addEventListener('click', function() {
+			var newDataset = {
+				backgroundColor: [],
+				data: [],
+				label: 'New dataset ' + config.data.datasets.length,
+			};
+
+			for (var index = 0; index < config.data.labels.length; ++index) {
+				newDataset.data.push(randomScalingFactor());
+
+				var colorName = colorNames[index % colorNames.length];
+				var newColor = window.chartColors[colorName];
+				newDataset.backgroundColor.push(newColor);
+			}
+
+			config.data.datasets.push(newDataset);
+			window.myPie.update();
+		});
+
+		
+    </script>
+        <div id="canvas-holder" style="width:40%"><canvas id="chart-area"></canvas></div>
+    
+        <!-- <div id="rightdiv" >right content right content right content</div> -->
+        <div id="leftdiv">
+            
+            
+        <h3><% poll.pollname %></h3>
+        <form name="pollVoting" action="foofoo" method="POST">
+            <fieldset>
+                <p><%poll.pollname%></p>
+                <p>OPTIONS (separated by line)</p>
+                <select name="selectoption" class="optionpicker" required onchange="if(this.options[this.selectedIndex].value=='customOption'){
+                    toggleField(this,this.nextSibling);
+                    this.selectedIndex='0';
+                }">                    
+                    <% for(var i = 0;i < poll.options.length;i++) { %>
+                        <option value=<%= poll.options[i]['optionid']%>> <%= poll.options[i]['optionname']%> </option>
+                    <% } %>
+                    <option value="customOption">[type a custom value]</option>
+                    <input name="selectoption" style="display:none;" disabled="disabled" onblur="if(this.value==''){toggleField(this,this.previousSibling);}">
+                </select>
+                <input type="submit" value="Submit" />
+            </fieldset>
+        </form>
+    </div>
+    </body>
+</html>
+
+
+
+<!-- res.render('newProject', {dropdownVals: result}) -->
+<!-- res.render('testtable',{page_title:"Test Table",data:rows}); -->
+
+<!-- app.get('/getJson', function (req, res) {
+    // If it's not showing up, just use req.body to see what is actually being passed.
+    console.log(req.body.optionpicker);
+}); -->
+
+
+<!-- Now in your post function you can access the selected option from the request object.
+
+app.post('/add', function(req, res, next) {
+    ....
+    var option = req.body.selectoption;
+    ....
+}) -->

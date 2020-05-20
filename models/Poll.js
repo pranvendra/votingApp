@@ -6,8 +6,24 @@ async function getPolls() {
     const allPollsQuery = `
     Select * from poll
     `;
-    var polls = await (await client.query(allPollsQuery)).rows
-    return polls
+    try {
+        var polls = await (await client.query(allPollsQuery)).rows   
+        return polls
+    } catch (error) {
+        console.error(error)
+        throw(error)
+    }
+}
+async function pollDetails(pollId){
+    const pollDetailQuery = `
+    Select * from poll where pollId = ${pollId}
+    `;
+    try {
+        var polls = await (await client.query(pollDetailQuery)).rows[0]   
+        return polls
+    } catch (error) {
+        console.error(error)
+    }
 }
 
 const createPollTableQuery = `
@@ -29,8 +45,12 @@ async function createPoll(pollName, uid = 1) {
     VALUES ('${pollName}', ${uid})
     RETURNING pollid
     `;
-    var polls = await client.query(createPoll);
-    return polls
+    try {
+        var polls = await client.query(createPoll);
+        return polls   
+    } catch (error) {
+        throw(error)
+    }
 }
 
 async function createOption(option, userId, pollId){
@@ -41,14 +61,81 @@ async function createOption(option, userId, pollId){
     });
     var createOption = format(`INSERT INTO option (createdBy, pollId, optionName)
     VALUES %L`, arr)
-    await client.query(createOption)
+    try {
+        await client.query(createOption)
+        return  
+    } catch (error) {
+        throw(error)
+    }
+}
+
+
+async function vote(optionId, pollId, userId){
+    let addVote = format(`
+    INSERT INTO vote(optionId, createdBy, pollId)
+    VALUES (${optionId}, ${userId}, ${pollId})
+    `);
+    try {
+        await client.query(addVote)
+        return   
+    } catch (error) {
+        throw(error)
+    }
+}
+
+async function getVotes(pollId){
+    let getVotes = format(`
+    SELECT * from vote where pollId = ${pollId}
+    `);
+    try {
+        let votes = await client.query(getVotes)
+        return votes   
+    } catch (error) {
+        throw(error)
+    }
+}
+
+async function getOptions(pollId){
+    let getOptions = format(`
+        SELECT * from option where pollId = ${pollId}
+    `);
+    try {
+        let options = await client.query(getOptions)
+        return options['rows']   
+    } catch (error) {
+        throw(error)
+    }
+}
+
+async function removePoll(pollId){
+    let removeOption = format(`
+    delete from option where pollId = ${pollId}
+    `)
+    let removeVote = format(`
+    delete from vote where pollId = ${pollId}
+    `)
+    let removePollQuery = format(`
+    delete from poll where pollId = ${pollId}
+    `)
+    try {
+        await client.query(removeVote)
+        await client.query(removeOption)
+        await client.query(removePollQuery)   
+    } catch (error) {
+        throw(error)
+    }
     return
 }
 
 
 module.exports = {
     getPolls,
+    pollDetails,
     createPollTable,
     createPoll,
-    createOption
+    createOption,
+    vote,
+    getVotes,
+    getOptions,
+    removePoll
 }

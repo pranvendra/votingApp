@@ -53,3 +53,4 @@ var server = app.listen(PORT, 'localhost', function () {
  app.use('/', mainRouter)
  app.use(passport.initialize());
  app.use(passport.session());
+app.set('view engine', 'ejs')

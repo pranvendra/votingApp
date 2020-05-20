@@ -1,0 +1,46 @@
+<html lang="en">
+    <head>
+        <title>
+            Voting App
+        </title>
+    </head>
+    <body>
+        <h3>Make a new Poll</h3>
+        <form name="pollCreation" action="foofoo" method="POST">
+            <!-- <fieldset> -->
+                <p>Poll Title</p>
+                <input type="text" name="pollTitle" required>
+                <p>OPTIONS (separated by line)</p>
+                <input type="textarea" name="pollOptions" required>
+                <input type="submit" value="Create" />
+
+            <!-- </fieldset> -->
+        </form>
+        <hr>
+
+        <h3>POLLS LIST</h3>
+        <table border="1" cellpadding="7" cellspacing="7">                
+            <tr>
+                <th>POLL TITLE</th>
+                <th>VIEW</th>
+                <th>REMOVE</th>
+            </tr>
+            <% if(polls.length){ 
+                for(var i = 0;i < polls.length;i++) { %>
+                <tr>
+                    <td><%= polls[i].pollname %></td>
+                    <td><a href="/viewfoofoo/" + <%= polls[i].pollid %> >View</a></td>
+                    <td><a href="/removefoofoo/" + <%= polls[i].pollid %> >Remove</a></td>
+                </tr>
+                <% }
+            }else{ %>
+                <tr>
+                <td colspan="3">No user</td>
+                </tr>
+            <% } %>
+        </table>
+    </body>
+</html>
+
+
+<!-- res.render('testtable',{page_title:"Test Table",data:rows}); -->
