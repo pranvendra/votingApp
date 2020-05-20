@@ -5,6 +5,8 @@ const mainRouter = require('./router/mainRouter')
 var passport = require('passport');
 var Strategy = require('passport-local').Strategy;
 var app = express()
+const bodyParser = require('body-parser');
+app.use(bodyParser.json()); 
   // .use(express.static(path.join(__dirname, 'public')))
   // .set('views', path.join(__dirname, 'views'))
   // .set('view engine', 'ejs')

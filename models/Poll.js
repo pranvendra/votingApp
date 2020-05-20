@@ -1,4 +1,5 @@
 const client =  require("./client").client
+const format = require('pg-format');
 
 
 async function getPolls() {
@@ -24,18 +25,30 @@ async function createPollTable() {
 
 async function createPoll(pollName, uid = 1) {
     var createPoll = `
-    INSERT INTO poll (pollName, userId)
-    VALUES ('${pollName}', '${uid}')
+    INSERT INTO poll(pollName, createdBy)
+    VALUES ('${pollName}', ${uid})
+    RETURNING pollid
     `;
     var polls = await client.query(createPoll);
     return polls
 }
 
-
+async function createOption(option, userId, pollId){
+    let arr = []
+    option.split("|").map(function(item) {
+        let item1 = item.trim();
+        arr.push([userId, pollId, item1])
+    });
+    var createOption = format(`INSERT INTO option (createdBy, pollId, optionName)
+    VALUES %L`, arr)
+    await client.query(createOption)
+    return
+}
 
 
 module.exports = {
     getPolls,
     createPollTable,
-    createPoll
+    createPoll,
+    createOption
 }

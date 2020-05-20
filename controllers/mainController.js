@@ -11,9 +11,13 @@ function createTables(){
     Poll.createPollTable()
 }
 
-function createPoll(req, res){
-    Poll.createPoll()
-
+async function createPoll(req, res){
+    let name = req.body.pollName
+    let option = req.body.option
+    let userId = req.body.userId
+    pollId = await Poll.createPoll(name, userId)
+    await Poll.createOption(option, userId, pollId.rows[0]['pollid'])
+    return res.redirect('/')
 }
 
 module.exports = {

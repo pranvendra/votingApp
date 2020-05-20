@@ -12,7 +12,10 @@ router.get('/createTables', PollsController.createTables)
 // router.post('/login', ensuredLogin ,function(req, res){
 //   res.redirect('/');
 // })
-router.get('/createPolls', PollsController.createTables)
+router.post('/createPoll', async (req, res) => {
+  await PollsController.createPoll(req)
+  return res.redirect('/')
+})
 
 
 router.post('/login', 
