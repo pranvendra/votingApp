@@ -2,24 +2,31 @@ const express = require('express')
 const path = require('path')
 const PORT = process.env.PORT || 5000
 const mainRouter = require('./router/mainRouter')
+
 var passport = require('passport');
 var Strategy = require('passport-local').Strategy;
 var app = express()
 const bodyParser = require('body-parser');
 app.use(bodyParser.json()); 
+//session 
 var session = require("express-session")
-const flash = require('connect-flash');
+var cookieParser = require('cookie-parser');
+var flash = require('connect-flash');
+app.use(cookieParser('secret'));
 app.use(session({
 	secret:'happy dog',
 	saveUninitialized: true,
-	resave: true
+  resave: true,
+  cookie: { maxAge: 60000 }
 }));
 app.use(flash());
+
 const findUser = require("./models/User").findUser
 app.use(express.static("public"));
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(passport.initialize());
 app.use(passport.session());
+
   // .use(express.static(path.join(__dirname, 'public')))
   // .set('views', path.join(__dirname, 'views'))
   // .set('view engine', 'ejs')

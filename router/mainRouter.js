@@ -58,11 +58,11 @@ router.post('/vote', async (req, res) => {
   }
   try {
     await PollsController.vote(req)
-    req.flash('message', 'Flash is back1232!')
+    req.flash('message', 'vote registered')
     res.redirect(redirectUrl);
   } catch (error) {
     // req.session.error = "can only vote once"
-    req.flash('info', 'Flash is back!')
+    req.flash('message', 'only one vote allowed')
     res.redirect(redirectUrl)
   }
 });
@@ -71,7 +71,7 @@ router.get('/viewPoll/:pollId', async(req, res)=>{
   let polls = await PollsController.viewPoll(req)
   let dynamicColor = await PollsController.createColors(polls['options'].length)
   let config = await PollsController.createConfig(dynamicColor, polls)
-  return res.render('poll', {poll:polls, config:config})
+  return res.render('poll', {poll:polls, config:config, message:req.flash('message')})
 });
 
 router.get('/getOptions/:pollId', async(req, res) => {
