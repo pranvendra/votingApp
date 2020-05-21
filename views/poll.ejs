@@ -80,7 +80,9 @@
         <!-- <div id="rightdiv" >right content right content right content</div> -->
         <div id="leftdiv">
             
-            
+        <% if ( message ) { %>
+            <div class="flash"><%= message %></div>
+        <% } %>
         <h3><%= poll.pollName %></h3>
         <form name="pollVoting" action="../vote" method="POST">
             <fieldset>
@@ -94,7 +96,7 @@
                         <option value=<%= poll.options[i]['optionid']%>> <%= poll.options[i]['optionname']%> </option>
                     <% } %>
                     <option value="customOption">[type a custom value]</option>
-                    <input name="selectoption" style="display:none;" disabled="disabled" onblur="if(this.value==''){toggleField(this,this.previousSibling);}">
+                    <input name="selectOption" style="display:none;" disabled="disabled" onblur="if(this.value==''){toggleField(this,this.previousSibling);}">
                     <input type="hidden" name="userId" value="1" />
                     <input type="hidden" name="pollId" value="<%=poll.pollId%>" />
                 </select>

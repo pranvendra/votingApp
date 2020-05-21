@@ -16,7 +16,7 @@ async function createPoll(req){
     let option = req.body.option
     let userId = req.body.userId
     pollId = await Poll.createPoll(name, userId)
-    await Poll.createOption(option, userId, pollId.rows[0]['pollid'])
+    await Poll.createOption(option, userId, pollId)
     return 
 }
 //need to test
@@ -24,8 +24,8 @@ async function addOption(req){
     let option = req.body.option
     let userId = req.body.userId
     let pollId = req.body.pollId
-    await Poll.createOption(option, userId, pollId)
-    return
+    var optionId = await Poll.createOption(option, userId, pollId)
+    return optionId
 }
 
 
@@ -33,7 +33,11 @@ async function vote(req){
     let optionId = req.body.optionId
     let pollId = req.body.pollId
     let userId = req.body.userId
-    await Poll.vote(optionId, pollId, userId)
+    try {
+        await Poll.vote(optionId, pollId, userId)
+    } catch (error) {
+        throw(error)
+    }
     return
 }
 
@@ -49,7 +53,7 @@ async function viewPoll(req){
     for (voteVal of votes.rows){
         optionDict[voteVal['optionid']]['vote'] += 1
     }
-    return {optionDict:optionDict, options:options, pollName:pollDetails['pollname']}
+    return {optionDict:optionDict, options:options, pollName:pollDetails['pollname'], pollId:pollDetails['pollid']}
 }
 
 async function getOptions(req, res){

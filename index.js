@@ -7,11 +7,16 @@ var Strategy = require('passport-local').Strategy;
 var app = express()
 const bodyParser = require('body-parser');
 app.use(bodyParser.json()); 
-
 var session = require("express-session")
+const flash = require('connect-flash');
+app.use(session({
+	secret:'happy dog',
+	saveUninitialized: true,
+	resave: true
+}));
+app.use(flash());
 const findUser = require("./models/User").findUser
 app.use(express.static("public"));
-app.use(session({ secret: "cats" }));
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(passport.initialize());
 app.use(passport.session());
@@ -20,7 +25,6 @@ app.use(passport.session());
   // .set('view engine', 'ejs')
   // .get('/', (req, res) => res.render('pages/index'))
   // .listen(PORT, () => console.log(`Listening on ${ PORT }`))
-
 
 passport.use('local', new Strategy(
   function(username, password, cb) {
@@ -32,11 +36,9 @@ passport.use('local', new Strategy(
     });
 }));
 
-
 passport.serializeUser(function(user, cb) {
   cb(null, user.username);
-});
-    
+});    
 
 passport.deserializeUser(function(id, cb) {
   findUser(username, function (err, user) {
@@ -45,24 +47,20 @@ passport.deserializeUser(function(id, cb) {
   });
 });
 
-
 var server = app.listen(PORT, 'localhost', function () {
   var host = server.address().address
   var port = server.address().port
   console.log("Example app listening at http://%s:%s", host, port)
  })
 
+app.use(require('morgan')('combined'));
+app.use('/', mainRouter)
 
- app.use(require('morgan')('combined'));
- 
-
- app.use('/', mainRouter)
-
-app.get('/login', function(req, res){
-  res.render('login');
-});
- app.post('/login',  passport.authenticate('local', { failureRedirect: '/logi' }),
- function(req, res) {
-   res.redirect('/');
- });
+// app.get('/login', function(req, res){
+//   res.render('login');
+// });
+//  app.post('/login',  passport.authenticate('local', { failureRedirect: '/logi' }),
+//  function(req, res) {
+//    res.redirect('/');
+//  });
 app.set('view engine', 'ejs')

@@ -60,10 +60,10 @@ async function createOption(option, userId, pollId){
         arr.push([userId, pollId, item1])
     });
     var createOption = format(`INSERT INTO option (createdBy, pollId, optionName)
-    VALUES %L`, arr)
+    VALUES %L RETURNING optionid`, arr)
     try {
-        await client.query(createOption)
-        return  
+        var optionid = await client.query(createOption)
+        return  optionid.rows[0]['optionid']
     } catch (error) {
         throw(error)
     }

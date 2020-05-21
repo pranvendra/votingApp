@@ -3,7 +3,7 @@ const router = express.Router();
 const PollsController = require('../controllers/mainController');
 const passport = require('passport')
 const ensuredLogin = require('connect-ensure-login').ensureLoggedIn()
-
+const url = require('url')
 
 
 function loggedIn(req, res, next) {
@@ -43,13 +43,28 @@ router.post('/createPoll', async (req, res) => {
 })
 
 router.post('/addOption', async (req, res) => {
-  PollsController.addOption(req)
+  await PollsController.addOption(req)
   return res.send(200)
 });
 
 router.post('/vote', async (req, res) => {
-  PollsController.vote(req)
-  return res.send(200)
+  var redirectUrl = url.format({
+    pathname:"/viewPoll/"+req.body.pollId,
+  })
+  if (req.body.selectOption){
+    req.body.option = req.body.selectOption
+    var optionId = await PollsController.addOption(req)
+    req.body.optionId = optionId
+  }
+  try {
+    await PollsController.vote(req)
+    req.flash('message', 'Flash is back1232!')
+    res.redirect(redirectUrl);
+  } catch (error) {
+    // req.session.error = "can only vote once"
+    req.flash('info', 'Flash is back!')
+    res.redirect(redirectUrl)
+  }
 });
 
 router.get('/viewPoll/:pollId', async(req, res)=>{
