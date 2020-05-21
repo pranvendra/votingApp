@@ -4,6 +4,24 @@ const PollsController = require('../controllers/mainController');
 const passport = require('passport')
 const ensuredLogin = require('connect-ensure-login').ensureLoggedIn()
 
+
+
+function loggedIn(req, res, next) {
+  console.log(req.user);
+  console.log('logged in: ' + req.isAuthenticated());
+
+  if (req.user || req.isAuthenticated() || req.method === 'OPTIONS') {
+    console.log("within if");
+    next();
+  }
+  else{ 
+    console.log("outside if");
+    req.session.error = 'Please sign in!';
+    res.redirect('/login');
+    res.status(400).send();
+  }
+}
+
 // Home page route.
 router.get('/', async (req, res)=> {
     var polls = await PollsController.polls()
@@ -21,7 +39,7 @@ router.get('/createTables', PollsController.createTables)
 // })
 router.post('/createPoll', async (req, res) => {
   await PollsController.createPoll(req)
-  return res.send(200)
+  return res.redirect('/')
 })
 
 router.post('/addOption', async (req, res) => {
@@ -48,15 +66,49 @@ router.get('/getOptions/:pollId', async(req, res) => {
 
 router.delete('/poll/:pollId', async(req, res) => {
   await PollsController.removePoll(req)
-  return res.send(200)
+  return res.redirect('/')
 });
 
 
-router.post('/login', 
-  passport.authenticate('local', { failureRedirect: '/login' }),
-  function(req, res) {
-    res.redirect('/');
-  });
+// router.post('/login', 
+//   passport.authenticate('local', { failureRedirect: '/login' }),
+//   function(req, res) {
+//     res.redirect('/');
+  // });
+
+
+
+  // router.post('/login', function(req,res,next){
+  //   console.log("reached login endpoint");
+  //   console.log(req.body);
+  //   passport.authenticate('local-login', function(err, user, info){ 
+  //   console.log("Test:" + user);
+  //     if (err) {
+  //       console.log("Error1");
+  //       return next(err);
+  //     }
+  //     if (!user) {
+  //       console.log("Error2");
+  //       return res.json(401, {
+  //           error: 'Auth Error!'
+  //       });
+  //     }
+  //     console.log(user)
+  //     req.logIn(user, function(err){
+  //       if (err) {
+  //         console.log('error on userController.js post /login logInErr', err);
+  //         return next(err);
+  //       }
+  //       // return res.status(200).json(user[0]);
+  //     console.log("Wednesday");
+  //     // req.session.save(() => res.redirect('/'));
+      
+  //     // res.redirect(200, '/');
+  //     return res.send({redirect: '/'});
+  //     // return res.redirect('/');
+  //     });
+  //   })(req, res, next);
+  // });
   
 router.get('/logout',
   function(req, res){

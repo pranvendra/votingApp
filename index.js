@@ -7,6 +7,14 @@ var Strategy = require('passport-local').Strategy;
 var app = express()
 const bodyParser = require('body-parser');
 app.use(bodyParser.json()); 
+
+var session = require("express-session")
+const findUser = require("./models/User").findUser
+app.use(express.static("public"));
+app.use(session({ secret: "cats" }));
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(passport.initialize());
+app.use(passport.session());
   // .use(express.static(path.join(__dirname, 'public')))
   // .set('views', path.join(__dirname, 'views'))
   // .set('view engine', 'ejs')
@@ -14,9 +22,9 @@ app.use(bodyParser.json());
   // .listen(PORT, () => console.log(`Listening on ${ PORT }`))
 
 
-passport.use(new Strategy(
+passport.use('local', new Strategy(
   function(username, password, cb) {
-    db.users.findByUsername(username, function(err, user) {
+    findUser(username, function(err, user) {
       if (err) { return cb(err); }
       if (!user) { return cb(null, false); }
       if (user.password != password) { return cb(null, false); }
@@ -26,12 +34,12 @@ passport.use(new Strategy(
 
 
 passport.serializeUser(function(user, cb) {
-  cb(null, user.id);
+  cb(null, user.username);
 });
     
 
 passport.deserializeUser(function(id, cb) {
-  db.users.findById(id, function (err, user) {
+  findUser(username, function (err, user) {
     if (err) { return cb(err); }
     cb(null, user);
   });
@@ -46,11 +54,15 @@ var server = app.listen(PORT, 'localhost', function () {
 
 
  app.use(require('morgan')('combined'));
- app.use(require('body-parser').urlencoded({ extended: true }));
- app.use(require('express-session')({ secret: 'keyboard cat', resave: false, saveUninitialized: false }));
  
 
  app.use('/', mainRouter)
- app.use(passport.initialize());
- app.use(passport.session());
+
+app.get('/login', function(req, res){
+  res.render('login');
+});
+ app.post('/login',  passport.authenticate('local', { failureRedirect: '/logi' }),
+ function(req, res) {
+   res.redirect('/');
+ });
 app.set('view engine', 'ejs')

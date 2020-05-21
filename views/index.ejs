@@ -6,12 +6,13 @@
     </head>
     <body>
         <h3>Make a new Poll</h3>
-        <form name="pollCreation" action="foofoo" method="POST">
+        <form name="pollCreation" action="createPoll" method="POST">
             <!-- <fieldset> -->
                 <p>Poll Title</p>
-                <input type="text" name="pollTitle" required>
+                <input type="text" name="pollName" required>
                 <p>OPTIONS (separated by line)</p>
-                <input type="textarea" name="pollOptions" required>
+                <input type="textarea" name="option" required>
+                <input type="hidden" name="userId" value="1" />
                 <input type="submit" value="Create" />
 
             <!-- </fieldset> -->
@@ -28,9 +29,9 @@
             <% if(polls.length){ 
                 for(var i = 0;i < polls.length;i++) { %>
                 <tr>
-                    <td><%= polls[i].pollname %></td>
-                    <td><a href="/viewfoofoo/" + <%= polls[i].pollid %> >View</a></td>
-                    <td><a href="/removefoofoo/" + <%= polls[i].pollid %> >Remove</a></td>
+                    <td><%= polls[i].pollname %> </td>
+                    <td><a href="viewPoll/<%= polls[i].pollid %>" >View </a></td>
+                    <td><a href="/poll/<%= polls[i].pollid %>" >Remove</a></td>
                 </tr>
                 <% }
             }else{ %>

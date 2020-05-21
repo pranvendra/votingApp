@@ -31,47 +31,49 @@
     </head>
       
     <body>
-	<script>
-		var randomScalingFactor = function() {
-			return Math.round(Math.random() * 100);
-		};
-        var config = "<%=config%>"
-		window.onload = function() {
-			var ctx = document.getElementById('chart-area').getContext('2d');
-			window.myPie = new Chart(ctx, config);
-		};
+    <script>
+        
+        // dynamicColor, polls
 
-		document.getElementById('randomizeData').addEventListener('click', function() {
-			config.data.datasets.forEach(function(dataset) {
-				dataset.data = dataset.data.map(function() {
-					return randomScalingFactor();
-				});
-			});
+        var config = JSON.parse('<%- JSON.stringify(config) %>');
+        console.log(config)
 
-			window.myPie.update();
-		});
+        window.onload = function() {
+            var ctx = document.getElementById('chart-area').getContext('2d');
+            window.myPie = new Chart(ctx, config);
+        };
 
-		var colorNames = Object.keys(window.chartColors);
-		document.getElementById('addDataset').addEventListener('click', function() {
-			var newDataset = {
-				backgroundColor: [],
-				data: [],
-				label: 'New dataset ' + config.data.datasets.length,
-			};
+        document.getElementById('randomizeData').addEventListener('click', function() {
+            config.data.datasets.forEach(function(dataset) {
+                dataset.data = dataset.data.map(function() {
+                    return randomScalingFactor();
+                });
+            });
 
-			for (var index = 0; index < config.data.labels.length; ++index) {
-				newDataset.data.push(randomScalingFactor());
+            window.myPie.update();
+        });
 
-				var colorName = colorNames[index % colorNames.length];
-				var newColor = window.chartColors[colorName];
-				newDataset.backgroundColor.push(newColor);
-			}
+        var colorNames = Object.keys(window.chartColors);
+        document.getElementById('addDataset').addEventListener('click', function() {
+            var newDataset = {
+                backgroundColor: [],
+                data: [],
+                label: 'New dataset ' + config.data.datasets.length,
+            };
 
-			config.data.datasets.push(newDataset);
-			window.myPie.update();
-		});
+            for (var index = 0; index < config.data.labels.length; ++index) {
+                newDataset.data.push(randomScalingFactor());
 
-		
+                var colorName = colorNames[index % colorNames.length];
+                var newColor = window.chartColors[colorName];
+                newDataset.backgroundColor.push(newColor);
+            }
+
+            config.data.datasets.push(newDataset);
+            window.myPie.update();
+        });
+
+        
     </script>
         <div id="canvas-holder" style="width:40%"><canvas id="chart-area"></canvas></div>
     
@@ -79,12 +81,12 @@
         <div id="leftdiv">
             
             
-        <h3><% poll.pollname %></h3>
-        <form name="pollVoting" action="foofoo" method="POST">
+        <h3><%= poll.pollName %></h3>
+        <form name="pollVoting" action="../vote" method="POST">
             <fieldset>
-                <p><%poll.pollname%></p>
+                <p><%=poll.pollName%></p>
                 <p>OPTIONS (separated by line)</p>
-                <select name="selectoption" class="optionpicker" required onchange="if(this.options[this.selectedIndex].value=='customOption'){
+                <select name="optionId" class="selectoption" required onchange="if(this.options[this.selectedIndex].value=='customOption'){
                     toggleField(this,this.nextSibling);
                     this.selectedIndex='0';
                 }">                    
@@ -93,6 +95,8 @@
                     <% } %>
                     <option value="customOption">[type a custom value]</option>
                     <input name="selectoption" style="display:none;" disabled="disabled" onblur="if(this.value==''){toggleField(this,this.previousSibling);}">
+                    <input type="hidden" name="userId" value="1" />
+                    <input type="hidden" name="pollId" value="<%=poll.pollId%>" />
                 </select>
                 <input type="submit" value="Submit" />
             </fieldset>

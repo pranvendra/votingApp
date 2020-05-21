@@ -1,4 +1,5 @@
 const client = require("./client").client
+const format = require('pg-format');
 
 
 async function createUser(userName, password) {
@@ -18,14 +19,11 @@ async function createUser(userName, password) {
 }
 
 async function findUser(userName){
-    var findUserQ = `select * from user where userName = ${userName}`
-    var user = await client.query(findUserQ, (err, res) => {
-        if (err) {
-            console.error(err);
-            return [];
-        }
-    });
-    return user
+    // await client.connect()
+    var findUserQ = format(`select * from public."user" where "userName" = '${userName}'`)
+    console.log(findUserQ)
+    var user = await client.query(findUserQ)
+    return user.rows[0]
 }
 
 
