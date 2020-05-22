@@ -32,12 +32,16 @@ app.use(passport.initialize());
 app.use(passport.session());
 app.use(methodOverride('_method'))
 
-var server = app.listen(PORT, 'localhost', function () {
-  var host = server.address().address
-  var port = server.address().port
-  console.log("Example app listening at http://%s:%s", host, port)
- })
+// var server = app.listen(PORT, 'localhost', function () {
+//   var host = server.address().address
+//   var port = server.address().port
+//   console.log("Example app listening at http://%s:%s", host, port)
+//  })
 
+
+app.listen(process.env.PORT || 3000, function(){
+  console.log("Express server listening on port %d in %s mode", this.address().port, app.settings.env);
+});
 app.use(require('morgan')('combined'));
 app.use('/', mainRouter)
 
