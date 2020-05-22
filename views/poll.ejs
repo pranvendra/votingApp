@@ -1,8 +1,10 @@
+<!doctype html>
 <html lang="en">
     <head>
         <title>
             Voting App
         </title>
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
         <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.4.0/Chart.min.js"></script>
         <script type="text/javascript" src="http://www.chartjs.org/assets/Chart.js">
         </script>
@@ -18,11 +20,6 @@
         </script>
 
         <style  type="text/css">
-        #leftdiv {
-                min-width: 400px;
-                max-width: 800px;
-            }
-            
             #canvas-holder {
                 width: 50px;
                 float: right;
@@ -31,98 +28,95 @@
     </head>
       
     <body>
-    <script>
-        
-        // dynamicColor, polls
-
-        var config = JSON.parse('<%- JSON.stringify(config) %>');
-        console.log(config)
-
-        window.onload = function() {
-            var ctx = document.getElementById('chart-area').getContext('2d');
-            window.myPie = new Chart(ctx, config);
-        };
-
-        document.getElementById('randomizeData').addEventListener('click', function() {
-            config.data.datasets.forEach(function(dataset) {
-                dataset.data = dataset.data.map(function() {
-                    return randomScalingFactor();
-                });
-            });
-
-            window.myPie.update();
-        });
-
-        var colorNames = Object.keys(window.chartColors);
-        document.getElementById('addDataset').addEventListener('click', function() {
-            var newDataset = {
-                backgroundColor: [],
-                data: [],
-                label: 'New dataset ' + config.data.datasets.length,
+        <script>
+            var config = JSON.parse('<%- JSON.stringify(config) %>');
+            console.log(config)
+            window.onload = function() {
+                var ctx = document.getElementById('chart-area').getContext('2d');
+                window.myPie = new Chart(ctx, config);
             };
+            document.getElementById('randomizeData').addEventListener('click', function() {
+                config.data.datasets.forEach(function(dataset) {
+                    dataset.data = dataset.data.map(function() {
+                        return randomScalingFactor();
+                    });
+                });
+                window.myPie.update();
+            });
+            var colorNames = Object.keys(window.chartColors);
+            document.getElementById('addDataset').addEventListener('click', function() {
+                var newDataset = {
+                    backgroundColor: [],
+                    data: [],
+                    label: 'New dataset ' + config.data.datasets.length,
+                };
+                for (var index = 0; index < config.data.labels.length; ++index) {
+                    newDataset.data.push(randomScalingFactor());
 
-            for (var index = 0; index < config.data.labels.length; ++index) {
-                newDataset.data.push(randomScalingFactor());
+                    var colorName = colorNames[index % colorNames.length];
+                    var newColor = window.chartColors[colorName];
+                    newDataset.backgroundColor.push(newColor);
+                }
+                config.data.datasets.push(newDataset);
+                window.myPie.update();
+            });
+        </script>
 
-                var colorName = colorNames[index % colorNames.length];
-                var newColor = window.chartColors[colorName];
-                newDataset.backgroundColor.push(newColor);
-            }
+        <nav class="navbar navbar-expand-lg navbar-light bg-light">
+            <button class="btn btn-sm btn-outline-secondary" type="submit">
+                <a href="../index">Voting App</a>
+            </button>
+            <ul class="nav navbar-nav ml-auto">
+                <form class="form-inline" action="/logout?_method=DELETE" method="POST">
+                    <button class="btn navbar-btn btn-danger" type="submit">Log Out</button>
+                </form>
+            </ul>
+        </nav>
 
-            config.data.datasets.push(newDataset);
-            window.myPie.update();
-        });
-
-        
-    </script>
         <% if (message) { %>
-            <div class="flash"><%= message %></div>
+            <div class="alert alert-primary alert-dismissible fade show" role="alert"><%= message %></div>
         <% } %>
-        <div id="canvas-holder" style="width:40%"><canvas id="chart-area"></canvas></div>
     
         <!-- <div id="rightdiv" >right content right content right content</div> -->
-        <div id="leftdiv">
-            
-        
-        <h3><%= poll.pollName %></h3>
-        <form name="pollVoting" action="../vote" method="POST">
-            <fieldset>
-                <p><%=poll.pollName%></p>
-                <p>OPTIONS (separated by line)</p>
-                <select name="optionId" class="selectoption" required onchange="if(this.options[this.selectedIndex].value=='customOption'){
-                    toggleField(this,this.nextSibling);
-                    this.selectedIndex='0';
-                }">                    
-                    <% for(var i = 0;i < poll.options.length;i++) { %>
-                        <option value=<%= poll.options[i]['optionid']%>> <%= poll.options[i]['optionname']%> </option>
-                    <% } %>
-                    <option value="customOption">[type a custom value]</option>
-                    <input name="selectOption" style="display:none;" disabled="disabled" onblur="if(this.value==''){toggleField(this,this.previousSibling);}">
-                    <input type="hidden" name="userId" value="1" />
-                    <input type="hidden" name="pollId" value="<%=poll.pollId%>" />
-                </select>
-                <input type="submit" value="Submit" />
-            </fieldset>
-        </form>
-    </div>
+        <div class="container">
+            <div class="row">
+                <div class="col-sm">
+                    <form name="pollVoting" action="../vote" method="POST">
+                        <fieldset>
+                            <p><%=poll.pollName%></p>
+                            <h3>Cast your vote</h3>
+                            <div class="form-group">
+                                <select name="optionId" class="selectoption form-control" required onchange="if(this.options[this.selectedIndex].value=='customOption'){
+                                    toggleField(this,this.nextSibling);
+                                    this.selectedIndex='0';
+                                }">                    
+                                    <% for(var i = 0;i < poll.options.length;i++) { %>
+                                        <option value=<%= poll.options[i]['optionid']%>> <%= poll.options[i]['optionname']%> </option>
+                                    <% }%>
+                                    <% if (!poll.options.length) {%>
+                                        <option></option>
+                                    <%}%>
+                                    <option value="customOption">[type a custom value]</option>
+                                    <input name="selectOption" style="display:none;" disabled="disabled" onblur="if(this.value==''){toggleField(this,this.previousSibling);}">
+                                    <input type="hidden" name="userId" value="<%=user.userId%>"/>
+                                    <input type="hidden" name="pollId" value="<%=poll.pollId%>"/>
+                                </select>
+                            </div>
+                            <input class="btn btn-primary" type="submit" value="Submit" />
+                        </fieldset>
+                    </form>
+                </div>
+                <div class="col-sm">
+                    <div id="canvas-holder" style="width:80%"><canvas id="chart-area"></canvas></div>
+                </div>
+            </div>    
+            <div class="row">
+                <div class="col-sm">
+                    <a class="twitter-share-button" href="https://twitter.com/share?text=Sharing this Poll from Voting App&url="+<%= currUrl %> >
+                        Share on Twitter
+                    </a>
+                </div>
+            </div>
+        </div>
     </body>
 </html>
-
-
-
-<!-- res.render('newProject', {dropdownVals: result}) -->
-<!-- res.render('testtable',{page_title:"Test Table",data:rows}); -->
-
-<!-- app.get('/getJson', function (req, res) {
-    // If it's not showing up, just use req.body to see what is actually being passed.
-    console.log(req.body.optionpicker);
-}); -->
-
-
-<!-- Now in your post function you can access the selected option from the request object.
-
-app.post('/add', function(req, res, next) {
-    ....
-    var option = req.body.selectoption;
-    ....
-}) -->

@@ -1,47 +1,108 @@
+<!doctype html>
 <html lang="en">
     <head>
         <title>
             Voting App
         </title>
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     </head>
     <body>
-        <h3>Make a new Poll</h3>
-        <form name="pollCreation" action="createPoll" method="POST">
+        <nav class="navbar navbar-expand-lg navbar-light bg-light">
+            <button class="btn btn-sm btn-outline-secondary" type="submit">
+                <a href="../index">Voting App</a>
+            </button>
+            <ul class="nav navbar-nav ml-auto">
+                <form class="form-inline" action="/logout?_method=DELETE" method="POST">
+                    <button class="btn navbar-btn btn-danger" type="submit">Log Out</button>
+                </form>
+            </ul>
+        </nav>
+            <div class="alert alert-primary alert-dismissible fade show" role="alert"></div>
+        <div class="container">
+            
+        </div>
+        <div class="container">
+            <h3>Make a new Poll</h3>
+            <form name="pollCreation" action="createPoll" method="POST">
             <!-- <fieldset> -->
-                <p>Poll Title</p>
-                <input type="text" name="pollName" required>
-                <p>OPTIONS (separated by line)</p>
-                <input type="textarea" name="option" required>
-                <input type="hidden" name="userId" value="1" />
-                <input type="submit" value="Create" />
-
+                <div class="form-group row">
+                    <label for="pollName" class="col-sm-2 col-form-label">Poll Title</label>
+                    <div class="col-sm-10">
+                        <input type="text" name="pollName" class="form-control" required>
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label for="option" class="col-sm-2 col-form-label">OPTIONS (separated by pipe(|))</label>
+                    <div class="col-sm-10">
+                        <input type="textarea" name="option" class="form-control" required>
+                    </div>
+                </div>
+                <input type="hidden" name="userId" value=<%=user.userId%> />
+                <div class="form-group">
+                    <input type="submit" class="btn navbar-btn btn-success" value="Create" />
+                </div>
             <!-- </fieldset> -->
-        </form>
+            </form>
+        </div>
         <hr>
 
-        <h3>POLLS LIST</h3>
-        <table border="1" cellpadding="7" cellspacing="7">                
-            <tr>
-                <th>POLL TITLE</th>
-                <th>VIEW</th>
-                <th>REMOVE</th>
-            </tr>
-            <% if(polls.length){ 
-                for(var i = 0;i < polls.length;i++) { %>
-                <tr>
-                    <td><%= polls[i].pollname %> </td>
-                    <td><a href="viewPoll/<%= polls[i].pollid %>" >View </a></td>
-                    <td><a href="/poll/<%= polls[i].pollid %>" >Remove</a></td>
-                </tr>
-                <% }
-            }else{ %>
-                <tr>
-                <td colspan="3">No user</td>
-                </tr>
-            <% } %>
-        </table>
+        <!-- <div class="container" style="width: 50%; float:left"> -->
+        <div class="container">
+            <div class="row">
+              <div class="col-sm">
+                <h3>My POLLS</h3>
+                <table class="table table-hover table-striped table-bordered" border="1" cellpadding="7" cellspacing="7">        
+                    <tr>
+                        <th scope="col">POLL TITLE</th>
+                        <th scope="col">VIEW</th>
+                        <th scope="col">REMOVE</th>
+                    </tr>
+                    <% if(myPolls.length){ 
+                        for(var i = 0;i < myPolls.length;i++) { %>
+                        <tr>
+                            <td><%= myPolls[i].pollname %> </td>
+                            <td><a href="viewPoll/<%= myPolls[i].pollid %>" >View </a></td>
+                            <td>
+                                <form action="/poll/<%= myPolls[i].pollid%>?_method=DELETE" method="POST">
+                                    <button type="submit">Remove</button>
+                                </form>
+                            </td>
+                        </tr>
+                        <% }
+                    }else{ %>
+                        <tr>
+                        <td colspan="3">No Polls</td>
+                        </tr>
+                    <% } %>
+                </table>
+              </div>
+              <div class="col-sm">
+                <h3>POLLS LIST</h3>
+                <table class="table table-hover table-striped table-bordered" border="1" cellpadding="7" cellspacing="7">        
+                    <tr>
+                        <th>POLL TITLE</th>
+                        <th>VIEW</th>
+                    </tr>
+                    <% if(allPolls.length){ 
+                        for(var i = 0;i < allPolls.length;i++) { %>
+                        <tr>
+                            <td><%= allPolls[i].pollname %> </td>
+                            <td><a href="viewPoll/<%= allPolls[i].pollid %>" >View </a></td>
+                        </tr>
+                        <% }
+                    }else{ %>
+                        <tr>
+                        <td colspan="3">No Polls</td>
+                        </tr>
+                    <% } %>
+                </table>
+              </div>
+            </div>
+          </div>   
+        </div>  
     </body>
 </html>
 
 
-<!-- res.render('testtable',{page_title:"Test Table",data:rows}); -->
+

@@ -4,19 +4,16 @@ const format = require('pg-format');
 
 async function createUser(userName, password) {
     const createUserQuery = `
-    INSERT INTO users (email, password)
+    INSERT INTO public."user" ("userName", "password")
     VALUES ('${userName}', '${password}')
     `;
-
-    await client.query(createUserQuery, (err, res) => {
-        if (err) {
-            console.error(err);
-            return;
-        }
-        console.log('Data insert successful');
-        client.end();
-    });
-}
+    try {
+        var user = await client.query(createUserQuery);
+        return user   
+    } catch (error) {
+        throw(error)
+    }
+};
 
 async function findUser(userName){
     // await client.connect()

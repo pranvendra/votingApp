@@ -1,48 +1,44 @@
 const express = require('express');
 const router = express.Router();
+const bcrypt = require('bcryptjs');
 const PollsController = require('../controllers/mainController');
 const passport = require('passport')
-const ensuredLogin = require('connect-ensure-login').ensureLoggedIn()
+const { ensureAuthenticated, forwardAuthenticated } = require('../config/auth');
 const url = require('url')
+const User = require('../models/User')
 
 
-function loggedIn(req, res, next) {
-  console.log(req.user);
-  console.log('logged in: ' + req.isAuthenticated());
-
-  if (req.user || req.isAuthenticated() || req.method === 'OPTIONS') {
-    console.log("within if");
-    next();
+router.get('/', (req, res)=> {
+  if (req.isAuthenticated()){
+    res.redirect('/index')
   }
-  else{ 
-    console.log("outside if");
-    req.session.error = 'Please sign in!';
-    res.redirect('/login');
-    res.status(400).send();
-  }
-}
-
-// Home page route.
-router.get('/', async (req, res)=> {
-    var polls = await PollsController.polls()
-    res.render('index',{polls:polls})
-})
-router.get('/polls', async (req, res)=> {
-  var polls = await PollsController.polls()
-  res.render('poll',{polls:polls})
+  res.redirect('/login')
 })
 
+router.get('/login', forwardAuthenticated, (req, res)=>{
+  res.render('login', {message:req.flash('message')})
+})
 
-router.get('/createTables', PollsController.createTables)
-// router.post('/login', ensuredLogin ,function(req, res){
-//   res.redirect('/');
-// })
-router.post('/createPoll', async (req, res) => {
+router.post('/login', 
+  passport.authenticate('local', { 
+    failureRedirect: '/login',
+    failureFlash: true
+   }),
+  function(req, res) {
+    res.redirect('/index');
+  });
+
+router.get('/index',  ensureAuthenticated, async (req, res)=> {
+  var polls = await PollsController.polls(req, res)
+  res.render('index',{allPolls:polls[1], myPolls:polls[0], user:req.user})
+})
+
+router.post('/createPoll', ensureAuthenticated, async (req, res) => {
   await PollsController.createPoll(req)
   return res.redirect('/')
 })
 
-router.post('/addOption', async (req, res) => {
+router.post('/addOption', ensureAuthenticated, async (req, res) => {
   await PollsController.addOption(req)
   return res.send(200)
 });
@@ -67,11 +63,11 @@ router.post('/vote', async (req, res) => {
   }
 });
 
-router.get('/viewPoll/:pollId', async(req, res)=>{
+router.get('/viewPoll/:pollId', ensureAuthenticated, async(req, res)=>{
   let polls = await PollsController.viewPoll(req)
   let dynamicColor = await PollsController.createColors(polls['options'].length)
   let config = await PollsController.createConfig(dynamicColor, polls)
-  return res.render('poll', {poll:polls, config:config, message:req.flash('message')})
+  return res.render('poll', {poll:polls, config:config, message:req.flash('message'), currUrl:req.url, user:req.user})
 });
 
 router.get('/getOptions/:pollId', async(req, res) => {
@@ -83,60 +79,28 @@ router.delete('/poll/:pollId', async(req, res) => {
   await PollsController.removePoll(req)
   return res.redirect('/')
 });
-
-
-// router.post('/login', 
-//   passport.authenticate('local', { failureRedirect: '/login' }),
-//   function(req, res) {
-//     res.redirect('/');
-  // });
-
-
-
-  // router.post('/login', function(req,res,next){
-  //   console.log("reached login endpoint");
-  //   console.log(req.body);
-  //   passport.authenticate('local-login', function(err, user, info){ 
-  //   console.log("Test:" + user);
-  //     if (err) {
-  //       console.log("Error1");
-  //       return next(err);
-  //     }
-  //     if (!user) {
-  //       console.log("Error2");
-  //       return res.json(401, {
-  //           error: 'Auth Error!'
-  //       });
-  //     }
-  //     console.log(user)
-  //     req.logIn(user, function(err){
-  //       if (err) {
-  //         console.log('error on userController.js post /login logInErr', err);
-  //         return next(err);
-  //       }
-  //       // return res.status(200).json(user[0]);
-  //     console.log("Wednesday");
-  //     // req.session.save(() => res.redirect('/'));
-      
-  //     // res.redirect(200, '/');
-  //     return res.send({redirect: '/'});
-  //     // return res.redirect('/');
-  //     });
-  //   })(req, res, next);
-  // });
   
-router.get('/logout',
-  function(req, res){
-    req.logout();
-    res.redirect('/');
-  });
 
+router.delete('/logout', (req, res) => {
+  req.logOut()
+  res.redirect('/login')
+})
 
-router.post('/signup', passport.authenticate('local-signup', {
-    successRedirect : '/', // redirect to the secure profile section
-    failureRedirect : '/signup', // redirect back to the signup page if there is an error
-    failureFlash : true // allow flash messages
-}));
+router.get('/register', forwardAuthenticated, (req, res) => {
+  res.render('register.ejs', {message:req.flash('message')})
+})
+  
+router.post('/register', async (req, res) => {
+  try {
+    const hashedPassword = await bcrypt.hash(req.body.password, 10)
+    await User.createUser(req.body.userName, hashedPassword)
+    res.redirect('/login')
+  } catch (e){
+    req.flash('message', e)
+    res.redirect('/register')
+  }
+})
+
 
 
 module.exports = router

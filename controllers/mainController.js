@@ -1,10 +1,11 @@
 const Poll = require('../models/Poll')
-
+const _ = require('lodash')
 
 async function polls(req, res) {
     var polls = await Poll.getPolls()
-    console.log(polls)
-    return polls
+    let myUid = req.user.userId
+    restPolls = _.partition(polls, ['createdby', myUid])
+    return restPolls
 }
 
 function createTables(){
@@ -16,7 +17,7 @@ async function createPoll(req){
     let option = req.body.option
     let userId = req.body.userId
     pollId = await Poll.createPoll(name, userId)
-    await Poll.createOption(option, userId, pollId)
+    await Poll.createOption(option, userId, pollId.rows[0]['pollid'])
     return 
 }
 //need to test
