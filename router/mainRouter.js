@@ -49,8 +49,13 @@ router.post('/vote', async (req, res) => {
   })
   if (req.body.selectOption){
     req.body.option = req.body.selectOption
-    var optionId = await PollsController.addOption(req)
-    req.body.optionId = optionId
+    try {
+      var optionId = await PollsController.addOption(req)
+      req.body.optionId = optionId
+    } catch (error) {
+      req.flash('message', 'option already present')
+      res.redirect(redirectUrl)
+    }
   }
   try {
     await PollsController.vote(req)

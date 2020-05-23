@@ -54,11 +54,18 @@ async function createPoll(pollName, uid = 1) {
 }
 
 async function createOption(option, userId, pollId){
-    let arr = []
+    let optionArr = []
     option.split("|").map(function(item) {
         let item1 = item.trim();
-        arr.push([userId, pollId, item1])
+        if(item){
+            optionArr.push(item1)
+        }
     });
+    optionArr = [...new Set(optionArr)]; 
+    let arr = []
+    optionArr.forEach(ar => {
+        arr.push([userId, pollId, ar])
+    })
     var createOption = format(`INSERT INTO option (createdBy, pollId, optionName)
     VALUES %L RETURNING optionid`, arr)
     try {
